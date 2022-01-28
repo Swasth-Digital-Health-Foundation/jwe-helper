@@ -4,7 +4,6 @@ import com.nimbusds.jose.*;
 import com.nimbusds.jose.crypto.RSADecrypter;
 import com.nimbusds.jose.crypto.RSAEncrypter;
 import com.nimbusds.jose.util.Base64URL;
-import com.sun.tools.javac.util.Pair;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
@@ -33,10 +32,6 @@ public class JweRequest implements JweRequestInterface {
 
     public Map<String, String> getEncryptedObject() {
         return encryptedObject;
-    }
-
-    public Pair<Map<String, Object>, Map<String, Object>> getPlainRequestBody() {
-        return new Pair<>(headers, payload);
     }
 
     public Map<String, Object> getHeaders() {
