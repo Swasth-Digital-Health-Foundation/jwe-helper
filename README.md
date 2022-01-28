@@ -27,6 +27,7 @@ The output format of the `encrypted-object` is a JSON object similar to the Flat
 The receiver will get the above-defined `encrypted-object`. It will have to pass the `encrypted-object` as a Java `Map<String, Object>` object to the `JweRequest`. After decrypting, the receiver will get `protected-header` and `payload` as Java `Map<String, Object>` objects.
 
 ## Usage
+Working sample code for the two methods is present in the [JweRequestTest](./src/test/java/org/swasth/jose/jwe/JweRequestTest.java)
 
 ### Encrypt the object on Sender's end
 ```
