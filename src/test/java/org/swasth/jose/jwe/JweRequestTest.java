@@ -28,7 +28,8 @@ import java.util.Map;
 @TestInstance(TestInstance.Lifecycle.PER_CLASS)
 class JweRequestTest {
 
-    KeyPair keyPair;
+    RSAPublicKey rsaPublicKey;
+    RSAPrivateKey rsaPrivateKey;
     Map<String, Object> headers, payload;
     Map<String, String> encryptedObject;
 
@@ -56,16 +57,14 @@ class JweRequestTest {
         PemObject pemObject = pemReader.readPemObject();
         PKCS8EncodedKeySpec privateKeySpec = new PKCS8EncodedKeySpec(pemObject.getContent());
         KeyFactory factory = KeyFactory.getInstance("RSA");
-        RSAPrivateKey rsaPrivateKey = (RSAPrivateKey) factory.generatePrivate(privateKeySpec);
+        rsaPrivateKey = (RSAPrivateKey) factory.generatePrivate(privateKeySpec);
 
         fileReader = new FileReader(getFile(filePathToSelfSignedCertificate));
         pemReader = new PemReader(fileReader);
         pemObject = pemReader.readPemObject();
         CertificateFactory certificateFactory = CertificateFactory.getInstance("X.509");
         X509Certificate x509Certificate = (X509Certificate) certificateFactory.generateCertificate(new ByteArrayInputStream(pemObject.getContent()));
-        RSAPublicKey publicKey = (RSAPublicKey) x509Certificate.getPublicKey();
-
-        keyPair = new KeyPair(publicKey, rsaPrivateKey);
+        rsaPublicKey = (RSAPublicKey) x509Certificate.getPublicKey();
     }
 
     private void initContent() {
@@ -82,7 +81,7 @@ class JweRequestTest {
         System.out.println("Provided Payload: " + payload);
 
         JweRequest jweRequest = new JweRequest(headers, payload);
-        jweRequest.encryptRequest((RSAPublicKey) keyPair.getPublic());
+        jweRequest.encryptRequest(rsaPublicKey);
         encryptedObject = jweRequest.getEncryptedObject();
         System.out.println("Encrypted Object: " + encryptedObject.toString());
     }
@@ -90,7 +89,7 @@ class JweRequestTest {
     @Test
     public void testDecrypt() throws ParseException, JOSEException {
         JweRequest jweRequest = new JweRequest(encryptedObject);
-        jweRequest.decryptRequest((RSAPrivateKey) keyPair.getPrivate());
+        jweRequest.decryptRequest(rsaPrivateKey);
         Map<String, Object> retrievedHeader = jweRequest.getHeaders();
         Map<String, Object> retrievedPayload = jweRequest.getPayload();
 
