@@ -21,6 +21,8 @@ public class JweRequest implements JweRequestInterface {
 
     private Map<String, String> encryptedObject;
 
+    private Map<String, String> deserializedObject;
+
     public JweRequest(Map<String, Object> headers, Map<String, Object> payload) {
         this.headers = headers;
         this.payload = payload;
@@ -50,26 +52,28 @@ public class JweRequest implements JweRequestInterface {
         RSAEncrypter rsaEncrypter = new RSAEncrypter(rsaPublicKey);
         jweObject.encrypt(rsaEncrypter);
         String serializedString = jweObject.serialize();
-
-        buildEncryptedObjectFromString(serializedString);
+        System.out.println("serializedString   "+ serializedString);
+        encryptedObject = new HashMap<>();
+        encryptedObject.put("payload", serializedString);
     }
 
     private void buildEncryptedObjectFromString(String serializedString) {
         String[] jweParts = serializedString.split("\\.");
-        encryptedObject = new HashMap<>();
-        encryptedObject.put("protected", jweParts[0]);
-        encryptedObject.put("encrypted_key", jweParts[1]);
-        encryptedObject.put("iv", jweParts[2]);
-        encryptedObject.put("ciphertext", jweParts[3]);
-        encryptedObject.put("tag", jweParts[4]);
+        this.deserializedObject = new HashMap<>();
+        this.deserializedObject.put("protected", jweParts[0]);
+        this.deserializedObject.put("encrypted_key", jweParts[1]);
+        this.deserializedObject.put("iv", jweParts[2]);
+        this.deserializedObject.put("ciphertext", jweParts[3]);
+        this.deserializedObject.put("tag", jweParts[4]);
     }
 
     public void decryptRequest(RSAPrivateKey rsaPrivateKey) throws ParseException, JOSEException {
-        JWEObject jweObject = new JWEObject(new Base64URL(encryptedObject.get("protected")),
-                new Base64URL(encryptedObject.get("encrypted_key")),
-                new Base64URL(encryptedObject.get("iv")),
-                new Base64URL(encryptedObject.get("ciphertext")),
-                new Base64URL(encryptedObject.get("tag")));
+        buildEncryptedObjectFromString(encryptedObject.get("payload"));
+        JWEObject jweObject = new JWEObject(new Base64URL(this.deserializedObject.get("protected")),
+                new Base64URL(this.deserializedObject.get("encrypted_key")),
+                new Base64URL(this.deserializedObject.get("iv")),
+                new Base64URL(this.deserializedObject.get("ciphertext")),
+                new Base64URL(this.deserializedObject.get("tag")));
         JWEDecrypter jweDecrypter = new RSADecrypter(rsaPrivateKey);
         jweObject.decrypt(jweDecrypter);
 
