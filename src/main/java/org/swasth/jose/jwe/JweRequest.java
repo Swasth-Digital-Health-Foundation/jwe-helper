@@ -52,7 +52,6 @@ public class JweRequest implements JweRequestInterface {
         RSAEncrypter rsaEncrypter = new RSAEncrypter(rsaPublicKey);
         jweObject.encrypt(rsaEncrypter);
         String serializedString = jweObject.serialize();
-        System.out.println("serializedString   "+ serializedString);
         encryptedObject = new HashMap<>();
         encryptedObject.put("payload", serializedString);
     }
@@ -76,7 +75,6 @@ public class JweRequest implements JweRequestInterface {
                 new Base64URL(this.deserializedObject.get("tag")));
         JWEDecrypter jweDecrypter = new RSADecrypter(rsaPrivateKey);
         jweObject.decrypt(jweDecrypter);
-
         this.headers = jweObject.getHeader().toJSONObject();
         this.payload = new HashMap<>(jweObject.getPayload().toJSONObject());
     }
